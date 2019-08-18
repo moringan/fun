@@ -19,7 +19,7 @@ int main (int argc, char *argv[]) {
 	int screen_rows = ROWS;
 	int screen_cols = COLS;
 	int rows = 0, cols = 0;
-	int c;
+	int c = 0;
 	int d;
 	int i = 0;
 	int j = 0;
@@ -31,6 +31,7 @@ int main (int argc, char *argv[]) {
 	start_color();
 	curs_set(FALSE);
 	keypad(stdscr, TRUE);
+//	noecho();
 
 	init_pair(1, COLOR_RED, COLOR_BLACK);
 	attron(COLOR_PAIR(1));
@@ -84,9 +85,12 @@ int main (int argc, char *argv[]) {
 	//make a variable array of number of Xs 
 
 	//randomly put the characters on the screen
+
 	int cur;
-	while(1){
-		
+	cbreak();
+	nodelay(stdscr, TRUE);
+	while( c != 'q' ) {
+		c = getch();
 		cur = rand() % count;
 		if(x_arr[cur].printed == FALSE) {
 			x_arr[cur].printed = TRUE;
@@ -98,7 +102,7 @@ int main (int argc, char *argv[]) {
 		}
 	}
 		
-	c = getch();
+	
 	endwin();
 
 	return 0;

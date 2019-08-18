@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#define DELAY 80000
+#define DELAY 120000
 #define ALIVE 1
 #define DEAD 0
 

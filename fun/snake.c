@@ -1,5 +1,7 @@
 /* Snake Game 
 by Mike Stapleton 6/20/19
+
+heavy use of linked lists, 
 */
 
 #include <ncurses.h>
@@ -15,6 +17,8 @@ by Mike Stapleton 6/20/19
 #define YDELAY 90000 //movement on y axis is faster so we need more delay
 #define SECTION_LEN 6
 #define NUM_FOOD 20
+#define HIGHSCORE_FILE "./highscore.dat"
+
 
 //A section of the snake
 struct Section {
@@ -180,6 +184,44 @@ void create_food (struct Food *start, int screen_rows, int screen_cols) {
 
 }
 
+//saves highscore, returns current highscore
+int set_highscore(int cur_score) {
+	int prev_score;
+	FILE *fp;
+
+	fp = fopen(HIGHSCORE_FILE, "r");
+	if(fp) {  
+		//file exists
+		fclose(fp);
+		//open for reading and writing
+		fp = fopen(HIGHSCORE_FILE, "r+");
+		if(fp == NULL) {
+			printf("Error opening %s in read/write mode\n", HIGHSCORE_FILE);
+			exit(0);
+		}
+		prev_score = getc(fp);
+		if(cur_score > prev_score) {
+			fseek(fp, 0L, SEEK_SET);
+			putc(cur_score, fp);
+		}
+		else {
+			cur_score = prev_score;
+		}
+		fclose(fp);
+	}
+	else {
+		//file doesn't exist (or there was an error)
+		//try to create the file 
+		fp = fopen(HIGHSCORE_FILE, "w");
+		if(fp == NULL) {
+			printf("Error creating file %s\n", HIGHSCORE_FILE);
+			exit(0);
+		}
+		putc(cur_score, fp);
+		fclose(fp);
+	}
+	return cur_score;
+}
 
 int main () {
 		
@@ -284,8 +326,9 @@ int main () {
 		}
 		clear();
 		nodelay(stdscr, FALSE);
-		mvprintw(10, 10, "Score: %d\n\n", score);
-		mvprintw(15, 10, "Do you want to play again? y/n\n");
+		mvprintw(5, 10, "Score: %d", score);
+		mvprintw(10, 10, "High Score: %d", set_highscore(score));
+		mvprintw(15, 10, "Do you want to play again? y/n");
 		while((c=getch()) != ERR) {
 			switch (c) {
 				case 'y': goto again;
@@ -309,14 +352,9 @@ int main () {
 	}
 	end: //play no more
 	current = start;
-
 	
 	endwin();
 
-	while (current != NULL) {
-		printf("%d %d\n", current->y, current->x);
-	        current = current->next;
-	}
 	free_memory(head, start);
 	return 0;
 	
